@@ -20,6 +20,18 @@ MAX_DAYS = MAX_DELTA.days
 MAX_SECONDS = MAX_DELTA.total_seconds()
 
 
+class Expression:
+    def __init__(self, value, repr):
+        self._repr = repr
+        self._value = value
+
+    def invoke(self):
+        return eval('self.' + self._repr)
+
+    def days_after(self, year):
+        return (self._value - datetime(year, 1, 1)).days
+
+
 class Result:
     def __init__(self, dt, repr):
         self._dt = dt
@@ -31,6 +43,9 @@ class Result:
     @property
     def dt(self):
         return self._dt
+
+    def expression(self, dt: datetime):
+        return Expression(dt, self._repr)
 
 
 def resolve(value):
