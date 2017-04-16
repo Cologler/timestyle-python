@@ -33,14 +33,11 @@ class Result:
         return self._dt
 
 
-def d1(value):
+def resolve(value):
     d = value / 60 / 60 / 24
     if d < MAX_DAYS:
         return Result(MIN + timedelta(d), 'days_after(1970) * 60 * 60 * 24')
     d = 1000
     if d < MAX_DAYS:
         return Result(MIN + timedelta(d), 'days_after(1970) * 60 * 60 * 24 * 1000')
-
-
-def enumerate_results(value):
-    yield d1(value)
+    raise NotImplementedError

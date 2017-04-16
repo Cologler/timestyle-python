@@ -10,7 +10,7 @@ import os
 import sys
 import traceback
 
-from core import enumerate_results, Result
+from core import resolve, Result
 
 
 def display_result(r: Result):
@@ -25,8 +25,7 @@ def main(argv=None):
         if len(argv) == 2:
             intvalue = int(argv[1])
             print('possible:')
-            for r in enumerate_results(intvalue):
-                display_result(r)
+            display_result(resolve(intvalue))
             print('end.')
     except Exception:
         traceback.print_exc()
