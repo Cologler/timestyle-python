@@ -39,7 +39,7 @@ def main(argv=None):
             if len(argv) == 3:
                 dt = parse_datatime(argv[2])
                 print(str(dt) + ' mean:')
-                print('  ' + str(result.expression(dt).invoke()))
+                print('  ' + str(result.invoke(dt)))
     except Exception:
         traceback.print_exc()
         input()

@@ -42,17 +42,19 @@ class Result:
 
     @property
     def dt(self):
+        '''get datetime of the result.'''
         return self._dt
 
-    def expression(self, dt: datetime):
-        return Expression(dt, self._repr)
+    def invoke(self, dt: datetime):
+        '''invoke the rule to calc the value of the datetime.'''
+        return Expression(dt, self._repr).invoke()
 
 
 def resolve(value):
     d = value / 60 / 60 / 24
     if d < MAX_DAYS:
         return Result(MIN + timedelta(d), 'days_after(1970) * 60 * 60 * 24')
-    d = 1000
+    d /= 1000
     if d < MAX_DAYS:
         return Result(MIN + timedelta(d), 'days_after(1970) * 60 * 60 * 24 * 1000')
     raise NotImplementedError
