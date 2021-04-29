@@ -30,19 +30,27 @@ def display_result(r: Result):
 def main(argv=None):
     if argv is None:
         argv = sys.argv
-    try:
-        if len(argv) > 1:
-            intvalue = int(argv[1])
-            print('possible:')
-            result = resolve(intvalue)
-            display_result(result)
-            if len(argv) == 3:
-                dt = parse_datatime(argv[2])
-                print(str(dt) + ' mean:')
-                print('  ' + str(result.invoke(dt)))
-    except Exception:
-        traceback.print_exc()
-        input()
+
+    args = argv[1:]
+    if not args:
+        print('infer datetime from digit')
+        return
+
+    else:
+        from_value = args[0]
+        if from_value.isdigit():
+            from_value_int = int(from_value)
+        else:
+            print('%r is not digit.' % from_value)
+            return
+
+        result = resolve(from_value_int)
+        print('%s maybe is:' % from_value_int)
+        display_result(result)
+        if len(argv) == 3:
+            dt = parse_datatime(argv[2])
+            print(str(dt) + ' mean:')
+            print('  ' + str(result.invoke(dt)))
 
 if __name__ == '__main__':
     main()
