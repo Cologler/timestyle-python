@@ -12,7 +12,7 @@ import traceback
 import re
 from datetime import datetime
 
-from core import resolve, Result
+from .core import resolve, Result
 
 
 def parse_datatime(value: str):
