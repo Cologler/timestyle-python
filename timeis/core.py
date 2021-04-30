@@ -6,7 +6,7 @@
 # parse number style datetime between (1970, 2050)
 # ----------
 
-import os
+from typing import *
 from datetime import datetime, timedelta
 
 CONST_MIN_YEAR = 1970
@@ -58,3 +58,8 @@ def resolve(value):
     if d < MAX_DAYS:
         return Result(MIN + timedelta(d), 'days_after(1970) * 60 * 60 * 24 * 1000')
     raise NotImplementedError
+
+def parse(value: float) -> Optional[datetime]:
+    'parse datetime from a float value.'
+    r = resolve(value)
+    return r.dt if r else None

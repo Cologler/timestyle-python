@@ -1,5 +1,10 @@
-# Copyright (c) 2017 cologler
+# -*- coding: utf-8 -*-
 #
-# This software is released under the MIT License.
-# https://opensource.org/licenses/MIT
+# Copyright (c) 2021~2999 - Cologler <skyoflw@gmail.com>
+# ----------
+#
+# ----------
 
+from .core import parse
+
+__all__ = ['parse']
