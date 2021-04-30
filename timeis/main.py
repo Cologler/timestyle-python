@@ -12,7 +12,7 @@ import traceback
 import re
 from datetime import datetime
 
-from .core import resolve, Result
+from .core import resolve, Result, infer_style
 
 
 def parse_datatime(value: str):
@@ -44,13 +44,10 @@ def main(argv=None):
             print('%r is not digit.' % from_value)
             return
 
-        result = resolve(from_value_int)
-        print('%s maybe is:' % from_value_int)
-        display_result(result)
-        if len(argv) == 3:
-            dt = parse_datatime(argv[2])
-            print(str(dt) + ' mean:')
-            print('  ' + str(result.invoke(dt)))
+        s = infer_style(from_value_int)
+        if s:
+            print('%s maybe is:' % from_value_int)
+            print(f'  {s.to_datetime(from_value_int)} (by {s})')
 
 if __name__ == '__main__':
     main()

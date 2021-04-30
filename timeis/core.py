@@ -12,54 +12,66 @@ from datetime import datetime, timedelta
 CONST_MIN_YEAR = 1970
 CONST_MAX_YEAR = 2050
 
-MIN = datetime(CONST_MIN_YEAR, 1, 1)
-MAX = datetime(CONST_MAX_YEAR, 1, 1)
-MAX_YEARS = CONST_MAX_YEAR - CONST_MIN_YEAR
-MAX_DELTA = (MAX - MIN)
-MAX_DAYS = MAX_DELTA.days
-MAX_SECONDS = MAX_DELTA.total_seconds()
+class _TimeStyle:
+    def match(self, value: float) -> bool:
+        raise NotImplementedError
+
+    def to_datetime(self, value: float) -> datetime:
+        raise NotImplementedError
+
+    def from_datetime(self, dt: datetime) -> float:
+        raise NotImplementedError
 
 
-class Expression:
-    def __init__(self, value, repr):
-        self._repr = repr
-        self._value = value
+class _UnixTimestamp(_TimeStyle):
+    DT1970 = datetime(1970, 1, 1)
+    MIN = 0
+    MAX = (datetime(CONST_MAX_YEAR, 12, 31) - DT1970).days * 24 * 60 * 60
 
-    def invoke(self):
-        return eval('self.' + self._repr)
+    def __init__(self, precision) -> None:
+        self._resolution = precision
+        self.max = self.MAX * precision
+        self.min = self.MIN
 
-    def days_after(self, year):
-        return (self._value - datetime(year, 1, 1)).days
+    def match(self, value: float):
+        return self.min < value < self.max
+
+    def to_datetime(self, value: float) -> datetime:
+        if self._resolution == 1: # seconds
+            delta = timedelta(seconds=value)
+        elif self._resolution == 10**3: # milliseconds
+            delta = timedelta(milliseconds=value)
+        elif self._resolution == 10**6: # microseconds
+            delta = timedelta(microseconds=value)
+        else:
+            delta = timedelta(microseconds=value*(self._resolution/1000/1000))
+        return self.DT1970 + delta
+
+    def from_datetime(self, dt: datetime) -> float:
+        delta = dt - self.DT1970
+        return ((delta.days * 86400 + delta.seconds) * 10**6 + delta.microseconds) * (self._resolution/1000/1000)
+
+    def __str__(self):
+        s = 'days_after(1970) * 60 * 60 * 24'
+        if self._resolution > 1:
+            s += f' * {self._resolution}'
+        return s
 
 
-class Result:
-    def __init__(self, dt, repr):
-        self._dt = dt
-        self._repr = repr
+_STYLES = (
+    _UnixTimestamp(1),      # seconds
+    _UnixTimestamp(10**3),  # milliseconds
+    _UnixTimestamp(10**6),  # microseconds
+    _UnixTimestamp(10**9),  # nanoseconds
+)
 
-    def __repr__(self):
-        return self._repr
-
-    @property
-    def dt(self):
-        '''get datetime of the result.'''
-        return self._dt
-
-    def invoke(self, dt: datetime):
-        '''invoke the rule to calc the value of the datetime.'''
-        return Expression(dt, self._repr).invoke()
-
-
-def resolve(value):
-    d = value / 60 / 60 / 24
-    if d < MAX_DAYS:
-        return Result(MIN + timedelta(d), 'days_after(1970) * 60 * 60 * 24')
-    d /= 1000
-    if d < MAX_DAYS:
-        return Result(MIN + timedelta(d), 'days_after(1970) * 60 * 60 * 24 * 1000')
-    raise NotImplementedError
+def infer_style(value: float) -> Optional[_TimeStyle]:
+    'infer datetime style from a float value.'
+    for style in _STYLES:
+        if style.match(value):
+            return style
 
 def parse(value: float) -> Optional[datetime]:
     'parse datetime from a float value.'
-    r = resolve(value)
-    return r.dt if r else None
+    s = infer_style(value)
+    return s.to_datetime(value) if s else None

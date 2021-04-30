@@ -5,6 +5,6 @@
 #
 # ----------
 
-from .core import parse
+from .core import parse, infer_style
 
-__all__ = ['parse']
+__all__ = ['parse', infer_style]
